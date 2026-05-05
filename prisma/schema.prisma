@@ -11,6 +11,44 @@ model User {
   email     String   @unique
   name      String?
   password  String
+  points    Int      @default(0)
+  routes    Route[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Workshop {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  latitude  Float
+  longitude Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Route {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  title       String
+  description String?
+  coverImage  String?
+  distanceKm  Float?
+  pois        Poi[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Poi {
+  id          String   @id @default(cuid())
+  routeId     String
+  route       Route    @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  latitude    Float
+  longitude   Float
+  imageUrl    String?
+  description String?
+  type        String?  // Ex: "photo", "hazard", "food"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

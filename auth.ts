@@ -26,7 +26,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         );
 
         if (passwordsMatch) {
-          return { id: user.id, name: user.name, email: user.email };
+          return { id: user.id, name: user.name, email: user.email, gamificationPoints: user.points };
         }
         return null;
       },
@@ -37,12 +37,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.gamificationPoints = user.gamificationPoints;
       }
       return token;
     },
     async session({ session, token }) {
       if (token?.id) {
         session.user.id = token.id as string;
+        session.user.gamificationPoints = token.gamificationPoints as number;
       }
       return session;
     },
