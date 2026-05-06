@@ -23,10 +23,35 @@ export async function GET(req: Request) {
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { points: true, name: true },
+      select: { 
+        points: true, 
+        name: true,
+        _count: {
+          select: { routes: true }
+        }
+      },
     });
 
-    return NextResponse.json({ success: true, gamification: user });
+    if (!user) return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
+
+    const getLevel = (pts: number) => {
+      if (pts >= 2500) return { level: 5, name: "Lenda das Estradas" };
+      if (pts >= 1000) return { level: 4, name: "Motonauta" };
+      if (pts >= 500) return { level: 3, name: "Explorador" };
+      if (pts >= 200) return { level: 2, name: "Viajante" };
+      return { level: 1, name: "Novato de Estrada" };
+    };
+
+    const levelInfo = getLevel(user.points);
+
+    return NextResponse.json({ 
+      success: true, 
+      gamification: {
+        ...user,
+        ...levelInfo,
+        routesCreated: user._count.routes
+      } 
+    });
   } catch (error) {
     console.error("Erro ao buscar pontos:", error);
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });

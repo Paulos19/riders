@@ -7,14 +7,16 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  password  String
-  points    Int      @default(0)
-  routes    Route[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(cuid())
+  email          String   @unique
+  name           String?
+  password       String
+  points         Int      @default(0)
+  emergencyName  String?
+  emergencyPhone String?
+  routes         Route[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model Workshop {
@@ -35,6 +37,10 @@ model Route {
   description String?
   coverImage  String?
   distanceKm  Float?
+  difficulty  String   @default("Médio") // Fácil, Médio, Difícil
+  rating      Float    @default(0)
+  ratingCount Int      @default(0)
+  path        Json?    // Array de coordenadas [{lat, lng}, ...]
   pois        Poi[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

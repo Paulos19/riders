@@ -22,7 +22,11 @@ export async function POST(req: Request) {
     if (!userId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 
     const body = await req.json();
-    const { title, description, coverImage, distanceKm, pois } = body;
+    const { title, description, coverImage, distanceKm, pois, path, difficulty } = body;
+
+    // Check if it's the user's first route
+    const routeCount = await prisma.route.count({ where: { userId } });
+    const pointsToAward = routeCount === 0 ? 100 : 30;
 
     const route = await prisma.route.create({
       data: {
@@ -31,6 +35,8 @@ export async function POST(req: Request) {
         description,
         coverImage,
         distanceKm,
+        difficulty: difficulty || "Médio",
+        path: path || [],
         pois: {
           create: pois?.map((poi: any) => ({
             latitude: poi.latitude,
@@ -46,7 +52,17 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({ success: true, route }, { status: 201 });
+    // Award points to user
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        points: {
+          increment: pointsToAward,
+        },
+      },
+    });
+
+    return NextResponse.json({ success: true, route, pointsAwarded: pointsToAward }, { status: 201 });
   } catch (error) {
     console.error("Erro ao criar rota:", error);
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
