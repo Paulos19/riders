@@ -18,13 +18,14 @@ function getUserIdFromRequest(req: Request): string | null {
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const userId = getUserIdFromRequest(req);
     if (!userId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 
-    const routeId = params.id;
+    const resolvedParams = await params;
+    const routeId = resolvedParams.id;
     const body = await req.json();
     const { rating } = body; // 1 to 5
 
